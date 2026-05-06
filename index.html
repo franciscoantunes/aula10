@@ -1,0 +1,123 @@
+<html>
+<head>
+
+	<link rel="stylesheet" href="css/leaflet.css" />
+	<script src="js/leaflet.js"></script>
+	<script src="data/cheiasrapidas.geojson"></script>
+	<script src="data/galgamentos.geojson"></script>
+	<script src="data/instavertentes.geojson"></script>
+	<script src="data/inundacaoestuarina.geojson"></script>
+	<script src="data/recuoarribas.geojson"></script>
+	<script src="data/equipamentos.geojson"></script>
+
+	<style>
+		#map { height: 100%; }
+	</style>
+ 
+</head>
+
+<body>
+	<div id="map"></div>
+	<script>
+	var map = L.map('map').setView([38.51120657603721, -8.900719547015877], 10);
+	var OSM = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+	}).addTo(map);
+
+	var Esri_WorldImagery = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+	attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+	}).addTo(map);
+	
+	function getColor(d) {
+        return d == "Elevada" ? '#ff0000' :
+           d == "Moderada"  ? '#ff7f00' :
+           d == "Reduzida"  ? '#ffff00' :
+                      '#FFEDA0';
+        }        
+		function cheiasrapidasStyle(feature) {
+        return {
+            fillColor: getColor(feature.properties.Suscet),
+            weight: 0,
+            opacity: 1,
+            color: 'white',
+            dashArray: '3',
+            fillOpacity: 0.7
+            };
+        }
+	
+	var cheiasrapidasLayer = new L.geoJSON(cheiasrapidasData,{
+	style: cheiasrapidasStyle
+	}).addTo(map); 	
+	
+	var galgamentosLayer = new L.geoJSON(galgamentosData,{
+	//style: galgamentosStyle
+	}).addTo(map); 	
+	
+	var instavertentesLayer = new L.geoJSON(instavertentesData,{
+	//style: instavertentesStyle
+	}).addTo(map); 
+	
+	var inundacaoestuarinaLayer = new L.geoJSON(inundacaoestuarinaData,{
+	//style: inundacaoestuarinaStyle
+	}).addTo(map); 
+	
+	var recuoarribasLayer = new L.geoJSON(recuoarribasData,{
+	//style: recuoarribasStyle
+	}).addTo(map); 	
+	
+		var meuIcon = L.icon({
+		iconUrl: '/home/administrador/Documents/mapa/images/school-svgrepo-com.svg',
+		iconSize:    [38, 95], // size of the icon
+		shadowSize:   [50, 64], // size of the shadow
+		iconAnchor:   [22, 94], // point of the icon which will correspond to marker's location
+		shadowAnchor: [4, 62],  // the same for the shadow
+		popupAnchor:  [-3, -76] // point from which the popup should open relative to the iconAnchor
+	});
+	
+	function onEachFeature(feature, layer) {
+    // does this feature have a property named popupContent?
+	layer.bindPopup(JSON.stringify(feature.properties));
+    }
+
+	var equipamentosLayer = new L.geoJSON(equipamentosData,{
+		onEachFeature: onEachFeature,
+        pointToLayer: function (feature, latlng) {
+        return L.marker(latlng, { icon: meuIcon });
+        }
+    }).addTo(map);
+	
+	var wmsLayer = L.tileLayer.wms('https://geo2.dgterritorio.gov.pt/geoserver/caop_continente/wms?', {
+	layers: 'cont_municipios',
+	opacity: 0.3
+	}).addTo(map); 	
+	
+	var baseMaps = {
+    "OpenStreetMap": OSM,
+    "OpenStreetMap.HOT": Esri_WorldImagery
+	};
+
+	var overlayMaps = {
+    "Cheias rápidas": cheiasrapidasLayer,
+	"Galgamentos": galgamentosLayer,
+	"Instabilidade de vertentes": instavertentesLayer,
+	"Limites administrativos": wmsLayer,
+	"Inundação estuarina": inundacaoestuarinaLayer,
+	"Recuo de arribas": recuoarribasLayer,
+	"Equipamentos": equipamentosLayer
+	};
+	
+	var layerControl = L.control.layers(baseMaps, overlayMaps).addTo(map);
+	
+	var escala = L.control.scale().addTo(map);
+	
+
+
+	
+
+	
+	
+
+	</script>
+</body>
+</html>
